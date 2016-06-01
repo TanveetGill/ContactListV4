@@ -4,17 +4,72 @@
 	<title>Contact List Version 4</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 	<script>
-		$(document).ready(function(){
+
+		$(document).ready(function() {
+
+			var $firstname = $('#firstname');
+			var $lastname = $('#lastname');
+			var $number = $('#number');
+			var $contacts = $('#all-contacts');
+			$.ajax({
+				type: 'GET',
+				url: '/contacts',
+				success: function(contacts) {
+					$.each(contacts, function(i, contact) {
+						$contacts.append('<li><strong>Firstname:</strong> ' + contact.firstname + ' <strong>Lastname:</strong> ' + contact.lastname + ' <strong>Phone Number:</strong> ' + contact.number + '<br><button data-id="' +contact.id+'" class="remove">DELETE</button></li>');
+					});
+				}
+			});
+
+			$('#create-contact').on('click', this, function() {
+
+				var contact = {
+					firstname: $firstname.val(),
+					lastname: $lastname.val(),
+					number: $number.val()
+				};
+
+				$.ajax({
+					type: 'POST',
+					url: '/contacts',
+					data: contact,
+					success: function(newContact) {
+						$contacts.append('<li><strong>Firstname:</strong> ' + contact.firstname + ' <strong>Lastname:</strong> ' + contact.lastname + ' <strong>Phone Number:</strong> ' + contact.number + '</li>');
+					}
+				});
+
+
+			});
+			$contacts.on('click', 'button.remove', function(e) {
+
+				$.ajax({
+					type: 'GET',
+					url: '/contacts/delete/' + $(this).attr('data-id')
+				}).done( function(contact) {
+					contact.destroy;
+				});
+
+			})
 
 		});
+
 	</script>
 </head>
 <body>
-<h1>Contacts:</h1>
-<% @contacts.each do |contact| %>
-	<h2>
-		<%= contact.firstname %>
-	</h2>
-<% end %>
+
+<div class="list-contacts">
+	<button id="list-contacts-bttn">Show Contacts</button>
+</div>
+<ul id="all-contacts"></ul>
+
+<form>
+	FirstName:<br>
+	<input type="text" id="firstname"><br>
+	LastName:<br>
+	<input type="text" id="lastname"><br>
+	Phone Number:<br>
+	<input type="text" id="number"><br>
+	<button id="create-contact">Submit</button>
+</form>
 </body>
 </html>
